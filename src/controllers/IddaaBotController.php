@@ -2,6 +2,9 @@
 
 namespace orhanbhr\IddaaBot\Controllers;
 
+use Illuminate\Contracts\View\Factory;
+use Illuminate\View\View;
+
 class IddaaBotController
 {
 
@@ -69,15 +72,62 @@ class IddaaBotController
         ]
     ];
 
+    /**
+     * @return Factory|View
+     */
     public function index()
     {
-
-
-        echo '<pre>';
-        print_r($this->program(2));
-        die;
-
         return view('iddaabot::matches');
+    }
+
+    /**
+     * @description Get Match Detail By SportId And EventId
+     * @param $sportId
+     * @param $eventId
+     * @return array|false|string
+     */
+    public function detail($sportId, $eventId)
+    {
+        $data = [
+            'status' => false,
+            'detail' => []
+        ];
+
+        // Empty Sport Id
+        if (!array_key_exists($sportId, $this->sports))
+            return $this->responseType == 1 ? json_encode($data) : $data;
+
+        // Get List
+        $getList = $this->getConnect('sportsprogram/markets/' . $sportId . '/' . $eventId);
+
+        if (!empty($getList->isSuccess) && $getList->isSuccess == 1) {
+
+            // Check Empty Data
+            if (empty($getList->data))
+                return $this->responseType == 1 ? json_encode($data) : $data;
+
+            // Change Response Status
+            $data['status'] = true;
+
+            // Set Detail Data
+            $data['detail'] = [
+                'id' => $getList->data->eid,
+                'sport_id' => $getList->data->sid,
+                'sport_name' => $this->sports[$getList->data->sid][$this->defaultLanguage],
+                'league_name' => trim($getList->data->cn),
+                'region_name' => trim($getList->data->ca),
+                'event_name' => trim($getList->data->en),
+                'start_date' => $getList->data->ed,
+                'mbs' => $getList->data->mb,
+                'betradar_id' => $getList->data->bid,
+                'is_live' => $getList->data->live == true ? 1 : 0,
+                'market_count' => $getList->data->mc,
+                'participants' => $this->participantsToArray($getList->data->eprt),
+                'markets' => $this->marketsToArray($getList->data->m)
+            ];
+        }
+
+        return $this->responseType == 1 ? json_encode($data) : $data;
     }
 
     /**
@@ -110,31 +160,22 @@ class IddaaBotController
 
             foreach ($getList->data->events as $key => $value) {
 
-                // Participants To Array
-                $participants = [];
 
-                if (!empty($value->eprt)) {
-                    foreach ($value->eprt as $participantKey => $participantValue) {
-                        $participants[] = [
-                            'short_name' => trim($participantValue->acr),
-                            'long_name' => trim($participantValue->pn)
-                        ];
-                    }
-                }
 
                 $data['list'][] = [
                     'id' => $value->eid,
                     'sport_id' => $value->sid,
                     'sport_name' => $this->sports[$value->sid][$this->defaultLanguage],
-                    'league_name' => $value->cn,
-                    'region_name' => $value->ca,
-                    'event_name' => $value->en,
+                    'league_name' => trim($value->cn),
+                    'region_name' => trim($value->ca),
+                    'event_name' => trim($value->en),
                     'start_date' => $value->ed,
                     'mbs' => $value->mb,
                     'betradar_id' => $value->bid,
                     'is_live' => $value->live == true ? 1 : 0,
                     'market_count' => $value->mc,
-                    'participants' => $participants
+                    'participants' => $this->participantsToArray($value->eprt),
+                    'markets' => $this->marketsToArray($value->m)
                 ];
             }
         }
@@ -143,6 +184,95 @@ class IddaaBotController
     }
 
     /**
+     * @description Participants To Array Method
+     * @param $data
+     * @return array
+     */
+    private function participantsToArray($data)
+    {
+        $participants = [];
+
+        if (!empty($data)) {
+            foreach ($data as $key => $value) {
+                $participants[] = [
+                    'short_name' => trim($value->acr),
+                    'long_name' => trim($value->pn)
+                ];
+            }
+        }
+
+        return $participants;
+    }
+
+    /**
+     * @param $className
+     * @return string
+     */
+    private function convertRateClass($className)
+    {
+        switch ($className) {
+            case 'd':
+                return 'down';
+
+            case 'u':
+                return 'up';
+
+            default:
+                return 'empty';
+        }
+    }
+
+    /**
+     * @description Rates To Array Method
+     * @param $data
+     * @return array
+     */
+    private function ratesToArray($data)
+    {
+        $rates = [];
+
+        if (!empty($data)) {
+            foreach ($data as $key => $value) {
+                $rates[] = [
+                    'id' => (int)trim($value->ov),
+                    'name' => (string)trim($value->ona),
+                    'no' => (string)trim($value->sono),
+                    'rate' => (float)trim($value->odd),
+                    'start_rate' => (float)trim($value->sodd),
+                    'class' => !empty($value->cs) ? $this->convertRateClass($value->cs) : null
+                ];
+            }
+        }
+
+        return $rates;
+    }
+
+    /**
+     * @description Markets To Array Method
+     * @param $data
+     * @return array
+     */
+    private function marketsToArray($data)
+    {
+        $markets = [];
+
+        if (!empty($data)) {
+            foreach ($data as $key => $value) {
+                $markets[] = [
+                    'id' => (int)trim($value->mid),
+                    'name' => (string)trim($value->mn),
+                    'no' => (int)trim($value->mno),
+                    'mbs' => (int)trim($value->mbs),
+                    'rates' => $this->ratesToArray($value->o)
+                ];
+            }
+        }
+
+        return $markets;
+    }
+
+    /**
+     * @description Change Lang
      * @param string $lang
      * @return $this
      */
@@ -159,6 +289,7 @@ class IddaaBotController
     }
 
     /**
+     * @description Change Response Type
      * @param int $typeId
      * @return $this
      */
