@@ -101,6 +101,10 @@ class IddaaBotController
 
         if (!empty($getList->isSuccess) && $getList->isSuccess == 1) {
 
+            // Check Empty Event List
+            if (empty($getList->data->events))
+                return $this->responseType == 1 ? json_encode($data) : $data;
+
             // Change Response Status
             $data['status'] = true;
 
