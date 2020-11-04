@@ -138,6 +138,33 @@ class IddaaBotController
     }
 
     /**
+     * @param string $lang
+     * @return $this
+     */
+    public function lang($lang = 'en')
+    {
+        $supportedLang = ['tr', 'en'];
+
+        // Check Supported Languages
+        if (in_array($lang, $supportedLang)) {
+            $this->defaultLanguage = $lang;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param int $typeId
+     * @return $this
+     */
+    public function responseType($typeId = 1)
+    {
+        $this->responseType = $typeId;
+
+        return $this;
+    }
+
+    /**
      * @description Website Connect GET Methods
      * @param $url
      * @return mixed
