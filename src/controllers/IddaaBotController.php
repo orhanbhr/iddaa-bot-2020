@@ -11,6 +11,7 @@ class IddaaBotController
      */
     private $apiUrl = 'https://api.iddaa.com/';
 
+
     /**
      * @description Default Response Type
      * @descriptipn 0 = Array
