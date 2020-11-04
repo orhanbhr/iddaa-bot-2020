@@ -8,6 +8,6 @@
  * Time: 15:21
  */
 
-Route::group(['namespace' => 'orhanbhr\IddaaBot\Http\Controllers'], function () {
+Route::group(['namespace' => 'orhanbhr\IddaaBot\Controllers'], function () {
     Route::get('matches', 'IddaaBotController@index')->name('iddaabot');
 });

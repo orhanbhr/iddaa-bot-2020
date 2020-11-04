@@ -1,6 +1,6 @@
 <?php
 
-namespace orhanbhr\IddaaBot\Http\Controllers;
+namespace orhanbhr\IddaaBot\Controllers;
 
 class IddaaBotController
 {
