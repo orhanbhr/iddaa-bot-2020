@@ -28,5 +28,10 @@
             "orhanbhr\\IddaaBot\\": "src/"
         }
     },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "master"
+        }
+    },
     "minimum-stability": "dev"
 }
