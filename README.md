@@ -4,7 +4,7 @@
 <a href="https://packagist.org/packages/orhanbhr/iddaa-bot-2020"><img src="https://img.shields.io/packagist/l/orhanbhr/iddaa-bot-2020" alt="License"></a>
 </p>
 
-# iddaa-bot-2020
+# Iddaa.com PHP Bot 2020
 It is PHP-based, allowing you to receive data from iddaa.com.
 
 ## Installation
@@ -84,3 +84,15 @@ Id | Name
 --- | ---
 1 | Json
 0 | Array
+
+## Contributing
+
+Thank you for considering contributing to the Iddaa Bot.
+
+## Developer
+
+[Orhan BAHAR](https://www.orhanbhr.com)
+
+## License
+
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
